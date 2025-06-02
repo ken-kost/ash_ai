@@ -125,7 +125,7 @@ defmodule MyApp.Blog do
     tool :read_posts, MyApp.Blog.Post, :read
     tool :create_post, MyApp.Blog.Post, :create
     tool :publish_post, MyApp.Blog.Post, :publish
-    tool :read_comments, MyApp.Blog.Commonet, :read
+    tool :read_comments, MyApp.Blog.Comment, :read
   end
 end
 ```
