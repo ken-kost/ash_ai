@@ -390,7 +390,7 @@ defmodule MyApp.ChatBot do
 
   def iex_chat(actor \\ nil) do
     %{
-      llm: ChatOpenAI.new!(%{model: "gpt-4o", stream: true),
+      llm: ChatOpenAI.new!(%{model: "gpt-4o", stream: true}),
       verbose: true
     }
     |> LLMChain.new!()
