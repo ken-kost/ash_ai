@@ -1,6 +1,22 @@
 # Ash AI
 <img src="https://github.com/ash-project/ash_ai/blob/main/logos/ash_ai.png?raw=true" alt="Logo" width="300"/>
 
+## Installation
+
+The package can be installed by adding `ash_ai` to your list of dependencies in `mix.exs`:
+
+```elixir
+def deps do
+  [
+    {:ash_ai, "~> 0.2"}
+  ]
+end
+```
+
+or using igniter: 
+
+`mix igniter.install ash_ai`
+
 ## MCP (Model Context Protocol) Server
 
 Both the dev & production MCP servers can be installed with
