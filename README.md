@@ -3,7 +3,18 @@
 
 ## Installation
 
-The package can be installed by adding `ash_ai` to your list of dependencies in `mix.exs`:
+<!-- tabs-open -->
+
+### With Igniter
+
+You can install `AshAi` using igniter. For example:
+```sh
+mix igniter.install ash_ai
+```
+
+### Manually
+
+Add `AshAi` to your list of dependencies:
 
 ```elixir
 def deps do
@@ -13,9 +24,8 @@ def deps do
 end
 ```
 
-or using igniter: 
+<!-- tabs-close -->
 
-`mix igniter.install ash_ai`
 
 ## MCP (Model Context Protocol) Server
 
