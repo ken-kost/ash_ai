@@ -144,7 +144,7 @@ defmodule AshAi.Tools do
             end)
             |> then(fn query ->
               if Map.has_key?(arguments, "filter") do
-                Ash.Query.filter_input(query, arguments["filter"])
+                Ash.Query.filter_input(query, arguments["filter"] || %{})
               else
                 query
               end
@@ -494,13 +494,17 @@ defmodule AshAi.Tools do
         }
       end
 
+    properties =
+      add_action_specific_properties(props_with_input, resource, action, action_parameters)
+
     %{
       type: :object,
-      properties:
-        add_action_specific_properties(props_with_input, resource, action, action_parameters),
+      properties: properties,
       required: Map.keys(props_with_input),
       additionalProperties: false
     }
+    |> AshAi.OpenApi.add_null_for_non_required()
+    |> AshAi.OpenApi.make_all_required()
     |> Jason.encode!()
     |> Jason.decode!()
   end
@@ -511,58 +515,44 @@ defmodule AshAi.Tools do
          %{type: :read, pagination: pagination},
          action_parameters
        ) do
-    Map.merge(properties, %{
-      filter: %{
-        type: :object,
-        description: "Filter results",
-        # querying is complex, will likely need to be a two step process
-        # i.e first decide to query, and then provide it with a function to call
-        # that has all the options Then the filter object can be big & expressive.
-        properties:
-          Ash.Resource.Info.fields(resource, [:attributes, :aggregates, :calculations])
-          |> Enum.filter(&(&1.public? && &1.filterable?))
-          |> Map.new(fn field ->
-            value =
-              AshAi.OpenApi.raw_filter_type(field, resource)
+    property_fields =
+      Ash.Resource.Info.fields(resource, [:attributes, :aggregates, :calculations])
+      |> Enum.filter(&(&1.public? && &1.filterable?))
+      |> Map.new(fn field ->
+        value =
+          AshAi.OpenApi.raw_filter_type(field, resource)
 
-            {field.name, value}
-          end)
-      },
+        {field.name, value}
+      end)
+
+    Map.merge(properties, %{
+      filter:
+        %{
+          type: :object,
+          additionalProperties: false,
+          required: [],
+          description: "Filter results",
+          # querying is complex, will likely need to be a two step process
+          # i.e first decide to query, and then provide it with a function to call
+          # that has all the options Then the filter object can be big & expressive.
+          properties:
+            Ash.Resource.Info.fields(resource, [:attributes, :aggregates, :calculations])
+            |> Enum.filter(&(&1.public? && &1.filterable?))
+            |> Map.new(fn field ->
+              value =
+                AshAi.OpenApi.raw_filter_type(field, resource)
+
+              {field.name, value}
+            end)
+        }
+        |> AshAi.OpenApi.add_null_for_non_required()
+        |> AshAi.OpenApi.make_all_required(),
       result_type: %{
         default: "run_query",
         description: "The type of result to return",
-        oneOf: [
-          %{
-            description:
-              "Run the query returning all results, or return a count of results, or check if any results exist",
-            enum: [
-              "run_query",
-              "count",
-              "exists"
-            ]
-          },
-          %{
-            properties: %{
-              aggregate: %{
-                type: :string,
-                description: "The aggregate function to use",
-                enum: [:max, :min, :sum, :avg, :count]
-              },
-              field: %{
-                type: :string,
-                description: "The field to aggregate",
-                enum:
-                  Ash.Resource.Info.fields(resource, [
-                    :attributes,
-                    :aggregates,
-                    :calculations
-                  ])
-                  |> Enum.filter(& &1.public?)
-                  |> Enum.map(& &1.name)
-              }
-            }
-          }
-        ]
+        type: :object,
+        additionalProperties: false,
+        required: []
       },
       limit: %{
         type: :integer,
@@ -585,6 +575,8 @@ defmodule AshAi.Tools do
         type: :array,
         items: %{
           type: :object,
+          additionalProperties: false,
+          required: [:field, :direction],
           properties:
             %{
               field: %{

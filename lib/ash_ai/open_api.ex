@@ -150,8 +150,8 @@ defmodule AshAi.OpenApi do
     |> with_attribute_description(attr)
   end
 
-  defp add_null_for_non_required(%{required: required} = schema)
-       when is_list(required) do
+  def add_null_for_non_required(%{required: required} = schema)
+      when is_list(required) do
     Map.update!(schema, :properties, fn
       properties when is_map(properties) ->
         Enum.reduce(properties, %{}, fn {key, value}, acc ->
@@ -372,7 +372,7 @@ defmodule AshAi.OpenApi do
 
   # this is kind of a hack, specifically because open ai requires that all fields
   # be required. But the value can be `null`
-  defp make_all_required(map) do
+  def make_all_required(map) do
     Map.put(map, :required, Map.keys(map.properties))
   end
 
@@ -876,10 +876,12 @@ defmodule AshAi.OpenApi do
       %{
         type: :object,
         properties: Map.new(fields),
-        additionalProperties: false
-        # required: required Missing?
+        additionalProperties: false,
+        required: []
       }
       |> with_attribute_description(attribute_or_aggregate)
+      |> add_null_for_non_required()
+      |> make_all_required()
     end
   end
 
