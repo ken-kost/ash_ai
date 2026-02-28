@@ -200,7 +200,7 @@ defmodule AshAi do
           """
         ],
         tools: [
-          type: {:wrap_list, :atom},
+          type: {:or, [:boolean, {:wrap_list, :atom}]},
           doc: """
            A list of tool names. If not set. Defaults to everything. If `actions` is also set, both are applied as filters.
           """
@@ -721,12 +721,10 @@ defmodule AshAi do
       end
     end)
     |> then(fn tools ->
-      if allowed_tools = opts.tools do
-        Enum.filter(tools, fn tool ->
-          tool.name in List.wrap(allowed_tools)
-        end)
-      else
-        tools
+      case opts.tools do
+        true -> tools
+        false -> []
+        allowed_tools -> Enum.filter(tools, &(&1.name in allowed_tools))
       end
     end)
     |> Enum.filter(
