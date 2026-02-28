@@ -201,6 +201,7 @@ defmodule AshAi do
         ],
         tools: [
           type: {:or, [:boolean, {:wrap_list, :atom}]},
+          default: true,
           doc: """
            A list of tool names. If not set. Defaults to everything. If `actions` is also set, both are applied as filters.
           """
