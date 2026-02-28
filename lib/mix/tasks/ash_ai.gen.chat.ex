@@ -540,7 +540,7 @@ if Code.ensure_loaded?(Igniter) do
           |> LLMChain.add_messages(message_chain)
           # add the names of tools you want available in your conversation here.
           # i.e tools: [:lookup_weather]
-          |> AshAi.setup_ash_ai(otp_app: :#{otp_app}, tools: [], actor: context.actor)
+          |> AshAi.setup_ash_ai(otp_app: :#{otp_app}, tools: true, actor: context.actor)
           |> LLMChain.add_callback(%{
             on_llm_new_delta: fn  _chain, deltas ->
               deltas
