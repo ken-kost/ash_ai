@@ -119,6 +119,7 @@ if Code.ensure_loaded?(Igniter) do
 
       The chat feature has been generated using the #{to_string(igniter.args.options[:provider] || "anthropic")} provider via LangChain.
       Please see LangChain's documentation if you need to configure a different model or provider settings.
+      All tools in your application are available in the chat by default. Change tools: true to tools: [:a, :list, :of, :tools] to change that.
       """)
       |> maybe_add_live_component_notice(chat)
     end
